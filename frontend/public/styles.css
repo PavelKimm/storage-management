@@ -1,0 +1,45 @@
+@import url("https://fonts.googleapis.com/css2?family=Comic+Neue:wght@400&display=swap");
+
+/* reset styles  */
+
+* {
+  background-color: blue;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+a {
+  color: white;
+  text-decoration: none;
+}
+
+ul {
+  margin-left: 1.5rem;
+  list-style: none;
+}
+
+button,
+input[type="submit"] {
+  border: none;
+  background: none;
+  color: none;
+  cursor: pointer;
+}
+
+h1,
+h2,
+h3,
+h4,
+h6,
+p,
+ul,
+ol {
+  margin: 1em 0;
+}
+
+/* general */
+
+body {
+  font-family: "Comic Neue", sans-serif;
+}

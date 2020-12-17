@@ -8,6 +8,9 @@ verify_ssl = true
 [packages]
 django = "*"
 djangorestframework = "*"
+dom = "*"
+django-cors-headers = "*"
+pandas = "*"
 
 [requires]
 python_version = "3.8"

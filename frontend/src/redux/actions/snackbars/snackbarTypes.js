@@ -1,0 +1,11 @@
+export const SNACKBAR_MESSAGE_TYPES = {
+  SET_SNACKBAR_MESSAGE: "SET_SNACKBAR_MESSAGE",
+  SET_SNACKBAR_MESSAGE_EMPTY: "SET_SNACKBAR_MESSAGE_EMPTY",
+};
+
+export const SEVERITY = {
+  ERROR: "error",
+  SUCCESS: "success",
+  INFO: "info",
+  WARNING: "warning",
+};

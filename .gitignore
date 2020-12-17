@@ -166,3 +166,4 @@ pip-wheel-metadata/
 .vim/
 
 1c_data/
+node_modules/
