@@ -5,17 +5,10 @@ import { fade, makeStyles } from "@material-ui/core/styles";
 import AppBar from "@material-ui/core/AppBar";
 import Toolbar from "@material-ui/core/Toolbar";
 import Badge from "@material-ui/core/Badge";
-import Menu from "@material-ui/core/Menu";
 import MenuItem from "@material-ui/core/MenuItem";
-import Grid from "@material-ui/core/Grid";
-import Paper from "@material-ui/core/Paper";
 import IconButton from "@material-ui/core/IconButton";
 import Typography from "@material-ui/core/Typography";
-import InputBase from "@material-ui/core/InputBase";
-import MenuIcon from "@material-ui/icons/Menu";
-import SearchIcon from "@material-ui/icons/Search";
 import ShoppingBasketIcon from "@material-ui/icons/ShoppingBasket";
-import NotificationsNoneIcon from "@material-ui/icons/NotificationsNone";
 
 import { logout } from "../../api/auth/authApi";
 import {
@@ -201,10 +194,8 @@ function Header(props) {
             </Link>
           </div>
           <div className={classes.headerContent}>
-            <Link to="/products" className={classes.link}>
-              <MenuItem className={classes.headerMenuItem}>
-                All products
-              </MenuItem>
+            <Link to="/load-data" className={classes.link}>
+              <MenuItem className={classes.headerMenuItem}>Load data</MenuItem>
             </Link>
           </div>
           <div className={classes.headerContent}>

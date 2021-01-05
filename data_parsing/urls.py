@@ -1,14 +1,12 @@
 from django.urls import path
 
 from data_parsing.views import (
-    load_products_and_categories_to_db, load_entries, EntryListView, load_purchases, AnalyticsView,
+    load_data, EntryListView, AnalyticsView,
     ProductListView, ActiveProductListView, ProductDetailView,
 )
 
 urlpatterns = [
-    path('load-products-and-categories-to-db/', load_products_and_categories_to_db),
-    path('load-entries/', load_entries),
-    path('load-purchases/', load_purchases),
+    path('load-data/', load_data),
 
     path('entries/', EntryListView.as_view()),
     path('analytics/', AnalyticsView.as_view()),

@@ -66,7 +66,7 @@ export default function ProductDetailPage() {
             },
             yaxis: [
               {
-                seriesName: "Покупки",
+                seriesName: "Закупки",
                 axisTicks: {
                   show: true,
                 },
@@ -80,7 +80,7 @@ export default function ProductDetailPage() {
                   },
                 },
                 title: {
-                  text: "Покупки",
+                  text: "Закупки",
                   style: {
                     color: "#d63c24",
                   },
@@ -165,7 +165,7 @@ export default function ProductDetailPage() {
           }}
           series={[
             {
-              name: "Покупки",
+              name: "Закупки",
               type: "bar",
               data: purchases,
               color: "#d63c24",

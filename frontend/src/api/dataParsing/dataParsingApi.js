@@ -1,5 +1,19 @@
 import { axiosWithHeader } from "../services/servicesApi";
 
+export const loadData = async (files) => {
+  return axiosWithHeader()
+    .post(`data-parsing/load-data/`, { files })
+    .catch((error) => {
+      const errorMessage =
+        (error.response &&
+          error.response.data &&
+          error.response.data.message) ||
+        error.message ||
+        error.toString();
+      throw errorMessage;
+    });
+};
+
 export const getActiveProductList = async () => {
   return axiosWithHeader()
     .get(`data-parsing/active-products/`)

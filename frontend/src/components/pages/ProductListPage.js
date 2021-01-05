@@ -43,7 +43,8 @@ export default function ProductListPage() {
         <TableHead>
           <TableRow>
             <TableCell>Name</TableCell>
-            <TableCell align="right">Num in stock</TableCell>
+            <TableCell>Num in stock</TableCell>
+            <TableCell align="center">Due to</TableCell>
           </TableRow>
         </TableHead>
         <TableBody>
@@ -55,9 +56,8 @@ export default function ProductListPage() {
                     {products[productId]["name"]}
                   </Link>
                 </TableCell>
-                <TableCell align="right">
-                  {products[productId]["num_in_stock"]}
-                </TableCell>
+                <TableCell>{products[productId]["num_in_stock"]}</TableCell>
+                <TableCell align="center">N/A</TableCell>
               </TableRow>
             );
           })}

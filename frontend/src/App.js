@@ -6,7 +6,6 @@ import {
   setUserDataStartAC,
   setUserDataSuccessAC,
   setUserDataErrorAC,
-  // getUserDataThunkAC,
 } from "./redux/actions/userData/userDataActions";
 import {
   setIsAuthedTrueAC,
@@ -18,7 +17,6 @@ import { getTokenFromLocalStorage } from "./api/services/servicesApi";
 
 import Header from "./components/layout/Header";
 import Main from "./components/layout/Main";
-import Footer from "./components/layout/Footer";
 import CustomSnackbar from "./components/snackbars/CustomSnackbar";
 import { SEVERITY } from "./redux/actions/snackbars/snackbarTypes";
 
@@ -67,17 +65,10 @@ function App(props) {
     }
   }, []);
 
-  //   const [isDrawerOpened, setIsDrawerOpened] = useState(false);
-
-  //   const toggleDrawerOpened = () => {
-  //     setIsDrawerOpened(!isDrawerOpened);
-  //   };
-
   return (
     <div>
       <Header />
       <Main />
-      {/*<Footer />*/}
 
       <CustomSnackbar />
     </div>

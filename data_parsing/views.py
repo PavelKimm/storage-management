@@ -16,22 +16,45 @@ from data_parsing.serializers import EntrySerializer, ProductListSerializer
 
 
 @api_view(['POST'])
-# @transaction.atomic
+@transaction.atomic
 # @permission_classes((IsAuthenticated, IsAdminUser))
-def load_products_and_categories_to_db(request, *args, **kwargs):
-    directory = '/Users/pavel/Desktop/PyCharmProjects/storage_management_1C/1c_data/data_dump/Data'
-    recorded_items_count = 0
-    passed_items_count = 0
-    for filename in os.listdir(directory):
-        if filename.endswith(".xml"):
-            xml_file = ElementTree.parse(os.path.join(directory, filename))
+def load_data(request, *args, **kwargs):
+    clear_db()
+
+    files = request.FILES.getlist('files')
+    result = {"recorded items": 0, "passed items": 0}
+
+    load_products_and_categories(files, result)
+    print(result)
+    print(files)
+
+    load_purchases(files, result)
+    print(result)
+
+    load_entries(files, result)
+    print(result)
+
+    return Response({"message": result}, status=HTTP_200_OK)
+
+
+def clear_db():
+    Category.objects.all().delete()
+    Entry.objects.all().delete()
+    Product.objects.all().delete()
+
+
+def load_products_and_categories(files, result):
+    for file in files:
+        _, file_ext = os.path.splitext(str(file))
+        if file_ext == ".xml":
+            xml_file = ElementTree.parse(file)
+            file.seek(0)  # reset pointer back to the start of the file
             root_element = xml_file.getroot()
             for dump_element in root_element:
                 if dump_element.tag != "DumpElement":
                     print("Not DumpElement!!!")
-                    print(f"Filename: {filename}")
+                    print(f"Filename: {file}")
                     continue
-
                 for catalog_object__product in dump_element:
                     db_object = {}
 
@@ -71,29 +94,73 @@ def load_products_and_categories_to_db(request, *args, **kwargs):
                                 elif db_object['is_folder'] is False:
                                     Product.objects.create(ref=db_object['ref'], category_ref=db_object['category_ref'],
                                                            name=db_object['description'])
-                                recorded_items_count += 1
+                                result['recorded items'] += 1
                         except IntegrityError:
-                            passed_items_count += 1
-
-    return Response({"message": f"Data was added! Recorded items count: {recorded_items_count}. "
-                                f"Passed items: {passed_items_count}."}, status=HTTP_200_OK)
+                            result['passed items'] += 1
 
 
-@api_view(['POST'])
-# @permission_classes((IsAuthenticated, IsAdminUser))
-def load_entries(request, *args, **kwargs):
-    directory = '/Users/pavel/Desktop/PyCharmProjects/storage_management_1C/1c_data/data_dump/Data'
-    recorded_lines_count = 0
-    passed_lines_count = 0
-
-    for filename in os.listdir(directory):
-        if filename.endswith(".xml"):
-            xml_file = ElementTree.parse(os.path.join(directory, filename))
+def load_purchases(files, result):
+    for file in files:
+        _, file_ext = os.path.splitext(str(file))
+        if file_ext == ".xml":
+            xml_file = ElementTree.parse(file)
+            file.seek(0)
             root_element = xml_file.getroot()
             for dump_element in root_element:
                 if dump_element.tag != "DumpElement":
                     print("Not DumpElement!!!")
-                    print(f"Filename: {filename}")
+                    print(f"Filename: {file}")
+                    continue
+
+                for purchases_record in dump_element:
+                    if purchases_record.tag.endswith('AccountingRegisterRecordSet.Налоговый'):
+
+                        for separate_record in purchases_record:
+                            if separate_record.tag.endswith('Record') and list(separate_record[0].attrib.values())[0] \
+                                    .endswith('ПоступлениеТоваровУслуг'):
+                                db_object = {}
+
+                                for info_row in separate_record:
+                                    if info_row.tag.endswith('Period'):
+                                        datetime_ = info_row.text
+                                        db_object['datetime'] = datetime_
+                                    elif info_row.tag.endswith('Active'):
+                                        if info_row.text == 'true':
+                                            is_active = True
+                                        else:
+                                            is_active = False
+                                        db_object['is_active'] = is_active
+                                    elif info_row.tag.endswith('ExtDimensionsDr'):
+                                        db_object['product_ref'] = info_row[1].text
+                                    elif info_row.tag.endswith('КоличествоDr'):
+                                        db_object['quantity'] = info_row.text
+
+                                if db_object['is_active']:
+                                    try:
+                                        product = Product.objects.get(ref=db_object['product_ref'])
+                                        Purchase.objects.create(product=product, created_at=db_object['datetime'],
+                                                                quantity=db_object['quantity'])
+                                        result['recorded items'] += 1
+                                    except Product.DoesNotExist:
+                                        print(f"{db_object['product_ref']} does not exist!")
+                                    except Exception as e:
+                                        print(str(e))
+                                        result['passed items'] += 1
+                                else:
+                                    print('is_active == False')
+
+
+def load_entries(files, result):
+    for file in files:
+        _, file_ext = os.path.splitext(str(file))
+        if file_ext == ".xml":
+            xml_file = ElementTree.parse(file)
+            file.seek(0)
+            root_element = xml_file.getroot()
+            for dump_element in root_element:
+                if dump_element.tag != "DumpElement":
+                    print("Not DumpElement!!!")
+                    print(f"Filename: {file}")
                     continue
 
                 for product_entry in dump_element:
@@ -143,73 +210,13 @@ def load_entries(request, *args, **kwargs):
                                         ProductInEntry.objects.create(entry=entry, product=product_obj,
                                                                       quantity=product['quantity'],
                                                                       price=product['price'])
-                                    recorded_lines_count += 1
+                                    result['recorded items'] += 1
                         except IntegrityError:
-                            passed_lines_count += 1
-    return Response({"message": f"Data was added! Recorded items count: {recorded_lines_count}. "
-                                f"Passed items: {passed_lines_count}."}, status=HTTP_200_OK)
-
-
-@api_view(['POST'])
-# @permission_classes((IsAuthenticated, IsAdminUser))
-def load_purchases(request, *args, **kwargs):
-    directory = '/Users/pavel/Desktop/PyCharmProjects/storage_management_1C/1c_data/data_dump/Data'
-    recorded_lines_count = 0
-    passed_lines_count = 0
-
-    for filename in os.listdir(directory):
-        if filename.endswith(".xml"):
-            xml_file = ElementTree.parse(os.path.join(directory, filename))
-            root_element = xml_file.getroot()
-            for dump_element in root_element:
-                if dump_element.tag != "DumpElement":
-                    print("Not DumpElement!!!")
-                    print(f"Filename: {filename}")
-                    continue
-
-                for purchases_record in dump_element:
-                    if purchases_record.tag.endswith('AccountingRegisterRecordSet.Налоговый'):
-
-                        for separate_record in purchases_record:
-                            if separate_record.tag.endswith('Record') and list(separate_record[0].attrib.values())[0] \
-                                    .endswith('ПоступлениеТоваровУслуг'):
-                                db_object = {}
-
-                                for info_row in separate_record:
-                                    if info_row.tag.endswith('Period'):
-                                        datetime_ = info_row.text
-                                        db_object['datetime'] = datetime_
-                                    elif info_row.tag.endswith('Active'):
-                                        if info_row.text == 'true':
-                                            is_active = True
-                                        else:
-                                            is_active = False
-                                        db_object['is_active'] = is_active
-                                    elif info_row.tag.endswith('ExtDimensionsDr'):
-                                        db_object['product_ref'] = info_row[1].text
-                                    elif info_row.tag.endswith('КоличествоDr'):
-                                        db_object['quantity'] = info_row.text
-
-                                if db_object['is_active']:
-                                    try:
-                                        product = Product.objects.get(ref=db_object['product_ref'])
-                                        Purchase.objects.create(product=product, created_at=db_object['datetime'],
-                                                                quantity=db_object['quantity'])
-                                        recorded_lines_count += 1
-                                    except Product.DoesNotExist:
-                                        print(f"{db_object['product_ref']} does not exist!")
-                                    except Exception as e:
-                                        print(str(e))
-                                        passed_lines_count += 1
-                                else:
-                                    print('is_active == False')
-    return Response({"message": f"Data was added! Recorded items count: {recorded_lines_count}. "
-                                f"Passed items: {passed_lines_count}."}, status=HTTP_200_OK)
+                            result['passed items'] += 1
 
 
 class EntryListView(generics.ListAPIView):
     serializer_class = EntrySerializer
-
     # permission_classes = (IsAuthenticated, IsAdminUser)
 
     def get_queryset(self):
